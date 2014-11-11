@@ -39,7 +39,7 @@ public class FocusView extends SurfaceView implements SurfaceHolder.Callback {
         super(context, attrs);
         this.context = context;
         float scale = context.getResources().getDisplayMetrics().density;
-        rectWidth = (int) (30 * scale + 0.5f);
+        rectWidth = (int) (25 * scale + 0.5f);
         sh = getHolder();
         sh.addCallback(this);
         sh.setFormat(PixelFormat.TRANSPARENT);
@@ -82,13 +82,17 @@ public class FocusView extends SurfaceView implements SurfaceHolder.Callback {
         Paint paint = new Paint();
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
         canvas.drawPaint(paint);
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
         if (bitmap != null) {
-            paint.setColor(Color.GREEN);
-            paint.setStrokeWidth(1.5f);
-            canvas.drawRect(rectWidth, rectWidth, rectWidth, rectWidth, paint);
-        } else {
+            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
             canvas.drawBitmap(bitmap, x - bitmap.getWidth() / 2, y - bitmap.getHeight() / 2, paint);
+        } else {
+            Paint paints = new Paint();
+            paints.setStrokeWidth(1.5f);
+            paints.setStyle(Paint.Style.STROKE);
+            paints.setColor(Color.GREEN);
+            paints.clearShadowLayer();
+            paint.setAntiAlias(true);
+            canvas.drawCircle(x, y, rectWidth, paints);
         }
         sh.unlockCanvasAndPost(canvas);
     }

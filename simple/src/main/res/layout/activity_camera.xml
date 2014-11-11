@@ -1,6 +1,24 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#0099cc">
+    android:layout_height="match_parent">
 
-</FrameLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <SurfaceView
+            android:id="@+id/sf_camera"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <io.values.camera.widget.FocusView
+            android:id="@+id/sf_focus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/sf_camera"
+            android:layout_alignLeft="@+id/sf_camera"
+            android:layout_alignRight="@+id/sf_camera"
+            android:layout_alignTop="@+id/sf_camera" />
+
+    </RelativeLayout>
+</merge>

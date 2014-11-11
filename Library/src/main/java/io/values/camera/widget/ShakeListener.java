@@ -22,10 +22,8 @@ public class ShakeListener implements SensorEventListener {
     public static ShakeListener newInstance() {
         if (sensor1 == null) {
             sensor1 = new ShakeListener();
-            return sensor1;
-        } else {
-            return sensor1;
         }
+        return sensor1;
     }
 
     public void start(Context context) {
@@ -40,7 +38,7 @@ public class ShakeListener implements SensorEventListener {
             try {
                 sensorManager.registerListener(this, sensor,
                         SensorManager.SENSOR_DELAY_NORMAL);
-            }catch (NullPointerException e){
+            } catch (NullPointerException e) {
                 e.printStackTrace();
             }
         }

@@ -10,6 +10,7 @@ import android.hardware.Camera;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.util.DisplayMetrics;
 import android.util.FloatMath;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -40,12 +41,21 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
     public final static int FLASH_OFF = 0;
     public final static int FLASH_ON = 1;
 
+    public static final int MODE4T3 = 43;
+    public static final int MODE16T9 = 169;
+
+    public static final int portrait = 90;
+    public static final int left_landscape = 0;
+    public static final int right_portrait = 180;
+
+    private int currentMODE = MODE4T3;
+
     private SurfaceHolder mHolder;
     private Camera mCamera;
     private CameraSizeComparator sizeComparator = new CameraSizeComparator();
 
-    private int flash_type = FLASH_AUTO; // 0 关闭 , 1 打开 , 2 自动
-    private static int camera_position = Camera.CameraInfo.CAMERA_FACING_BACK;// 0 后置摄像头 , 1 前置摄像头
+    private int flash_type = FLASH_AUTO; // 0 open , 1 close , 2 auto
+    private static int camera_position = Camera.CameraInfo.CAMERA_FACING_BACK;// 0 back camera , 1 front camera
     private int takePhotoOrientation = 90;
     private Handler handler;
 
@@ -56,7 +66,7 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
 
     private SurfaceView surfaceView;
     private String PATH_DIR = Environment.getExternalStorageDirectory().getAbsolutePath() + "/ResoCamera/";
-    private String PATH_FILE = PATH_DIR + "img_test.jpg";
+    private String PATH_FILE;
 
     private String dirPath;
     private int screenDpi;
@@ -65,7 +75,17 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
         this.dirPath = dirPath;
     }
 
-    public void setCameraView(Context context, SurfaceView surfaceView) throws Exception {
+    private Context context;
+
+    public CameraView(Context context) {
+        this.context = context;
+    }
+
+    public void setMode(int mode) {
+        this.currentMODE = mode;
+    }
+
+    public void setCameraView(SurfaceView surfaceView) throws Exception {
         this.surfaceView = surfaceView;
         screenDpi = context.getResources().getDisplayMetrics().densityDpi;
         mHolder = surfaceView.getHolder();
@@ -92,7 +112,7 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        if (screenDpi > 230 && screenDpi < 280) {
+        if (screenDpi == DisplayMetrics.DENSITY_HIGH) {
             zoomFlag = 10;
         }
     }
@@ -144,7 +164,9 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
         Collections.sort(sizes, sizeComparator);
         for (Camera.Size size : sizes) {
             params.setPreviewSize(size.width, size.height);
-            if (size.width * 1.0 / 4 == size.height * 1.0 / 3) {
+            if (size.width * 1.0 / size.height * 1.0 == 4.0 / 3.0 && currentMODE == MODE4T3) {
+                break;
+            } else if (size.width * 1.0 / size.height * 1.0 == 16.0 / 9.0 && currentMODE == MODE16T9) {
                 break;
             }
         }
@@ -157,7 +179,9 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
         Collections.sort(sizes, sizeComparator);
         for (Camera.Size size : sizes) {
             params.setPictureSize(size.width, size.height);
-            if (size.width * 1.0 / 4 == size.height * 1.0 / 3 && size.height < 2500) {
+            if (size.width * 1.0 / size.height * 1.0 == 4.0 / 3.0 && currentMODE == MODE4T3 && size.height < 2500) {
+                break;
+            } else if (size.width * 1.0 / size.height * 1.0 == 16.0 / 9.0 && currentMODE == MODE16T9 && size.height < 2500) {
                 break;
             }
         }
@@ -171,6 +195,8 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
      */
     public final void onResume() {
         Log.i(TAG, "camera-resume");
+        if (surfaceView == null)
+            throw new NullPointerException("not init surfaceView for camera view");
         openCamera();
     }
 
@@ -262,7 +288,7 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
             if (dirPath != null && !dirPath.equals("")) {
                 PATH_DIR = dirPath;
             }
-            PATH_FILE = "IMG_" + System.currentTimeMillis() + ".jpg";
+            PATH_FILE = PATH_DIR + "IMG_" + System.currentTimeMillis() + ".jpg";
             createFolder(PATH_DIR);
             createFile(PATH_FILE);
             new Thread(new Runnable() {
