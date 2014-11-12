@@ -19,7 +19,6 @@ Function：
     mCamera.changeFlash();    
     mCamera.changeCamera();    
     mCamera.takePicture();    
-    mCamera.changeFlash();     
 
 ````java
          public interface OnCameraSelectListener {
