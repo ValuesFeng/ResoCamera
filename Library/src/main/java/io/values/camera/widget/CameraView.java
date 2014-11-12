@@ -88,6 +88,12 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
         this.context = context;
     }
 
+    /**
+     * @param surfaceView the camera view you should give it
+     * @param screenWidth width of the screen
+     * @param cameraMode  set the camera preview proportion ,default is MODE4T3; {@link #MODE4T3}
+     * @throws Exception
+     */
     public void setCameraView(SurfaceView surfaceView, int screenWidth, int cameraMode) throws Exception {
         this.surfaceView = surfaceView;
         this.currentMODE = cameraMode;
@@ -222,6 +228,11 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
     public final void onPause() {
         Log.i(TAG, "camera-pause");
         closeCamera();
+    }
+
+    public final int changeFlash(int flash_type){
+        this.flash_type = flash_type;
+        return changeFlash();
     }
 
     /**
@@ -561,7 +572,7 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
     public interface OnCameraSelectListener {
         public void onTakePicture(boolean success, String filePath);
 
-        public void onChangeFlashMode(int mode);
+        public void onChangeFlashMode(int flashMode);
 
         public void onChangeCameraPosition(int camera_position);
     }
