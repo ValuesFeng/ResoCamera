@@ -1,7 +1,7 @@
 ResoCamera
 ==========
 
-![Screenshot](https://github.com/ValuesFeng/ResoCamera/tree/master/images/screenshot_camera.jpg)
+![Screenshot](https://github.com/ValuesFeng/ResoCamera/blob/master/images/screenshot_camera.jpg)
 
 Function：
 ==========    
