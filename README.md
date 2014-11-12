@@ -12,20 +12,21 @@ Function：
 
 
 ## Simple
-    * Flash Mode : FLASH_AUTO('default'),FLASH_OPEN,FLASH_CLOSE;    
-    * Camera Preview Proportion : MODE4T3('default'),MODE16T9;    
-        you can use:    
-         mCamera.changeFlash();    
-         mCamera.changeCamera();    
-         mCamera.takePicture();    
-         mCamera.changeFlash();    
-         ````java
+* Flash Mode : FLASH_AUTO('default'),FLASH_OPEN,FLASH_CLOSE;    
+* Camera Preview Proportion : MODE4T3('default'),MODE16T9;    
+ ####you can use:    
+ mCamera.changeFlash();    
+ mCamera.changeCamera();    
+ mCamera.takePicture();    
+ mCamera.changeFlash();     
+
+````java
          public interface OnCameraSelectListener {
             public void onTakePicture(boolean success, String filePath);
             public void onChangeFlashMode(int flashMode);
             public void onChangeCameraPosition(int camera_position);
         }
-         ````
+````
     
 ## Quick Setup
 #### 1. Android Manifest
