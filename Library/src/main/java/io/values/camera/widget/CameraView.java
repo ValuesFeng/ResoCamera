@@ -41,9 +41,9 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
     public static final int MODE4T3 = 43;
     public static final int MODE16T9 = 169;
 
-    public static final int portrait = 90;
-    public static final int left_landscape = 0;
-    public static final int right_portrait = 180;
+    public static final int LandscapeLeft = 0;
+    public static final int LandscapeRight = 180;
+    public static final int Portrait = 90;
 
     private int currentMODE = MODE4T3;
 
@@ -155,7 +155,7 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
             mCamera.setPreviewDisplay(mHolder);
             setCameraPictureSize();
             setCameraPreviewSize();
-            changeFlash();
+            changeFlash(flash_type);
             mCamera.startPreview();
         } catch (Exception e) {
             e.printStackTrace();
@@ -167,6 +167,7 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
             mCamera.stopPreview();
             mCamera.release();
         }
+        flash_type = FLASH_AUTO;
         mCamera = null;
     }
 
@@ -219,6 +220,7 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
         if (surfaceView == null)
             throw new NullPointerException("not init surfaceView for camera view");
         openCamera();
+        ShakeListener.newInstance().start(context);
     }
 
     /**
@@ -228,9 +230,10 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
     public final void onPause() {
         Log.i(TAG, "camera-pause");
         closeCamera();
+        ShakeListener.newInstance().stop();
     }
 
-    public final int changeFlash(int flash_type){
+    public final int changeFlash(int flash_type) {
         this.flash_type = flash_type;
         return changeFlash();
     }
@@ -245,7 +248,7 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
             return 0;
         }
         if (onCameraSelectListener != null) {
-            onCameraSelectListener.onChangeFlashMode(flash_type);
+            onCameraSelectListener.onChangeFlashMode((flash_type) % 3);
         }
         Log.i(TAG, "camera-flash-type:" + flash_type);
         switch (flash_type % 3) {
