@@ -8,8 +8,6 @@ import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.hardware.Camera;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
 import android.util.DisplayMetrics;
 import android.util.FloatMath;
 import android.util.Log;
@@ -17,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -34,8 +33,6 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
         Camera.AutoFocusCallback, View.OnTouchListener {
 
     public final static String TAG = CameraView.class.getSimpleName();
-    public final static int SUCCESS = 1;
-    public final static int FAILED = 0;
 
     public final static int FLASH_AUTO = 2;
     public final static int FLASH_OFF = 0;
@@ -53,13 +50,13 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
     private SurfaceHolder mHolder;
     private Camera mCamera;
     private CameraSizeComparator sizeComparator = new CameraSizeComparator();
+    private FocusView focusView;
 
-    private int flash_type = FLASH_AUTO; // 0 open , 1 close , 2 auto
+    private int flash_type = FLASH_AUTO; // 0 close , 1 open , 2 auto
     private static int camera_position = Camera.CameraInfo.CAMERA_FACING_BACK;// 0 back camera , 1 front camera
     private int takePhotoOrientation = 90;
-    private Handler handler;
 
-    private boolean isSqurae;
+    private boolean isSquare;
 
     private int topDistance;
     private int zoomFlag = 0;
@@ -70,6 +67,16 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
 
     private String dirPath;
     private int screenDpi;
+    private float focusAreaSize = 100;
+    private OnCameraSelectListener onCameraSelectListener;
+
+    public void setOnCameraSelectListener(OnCameraSelectListener onCameraSelectListener) {
+        this.onCameraSelectListener = onCameraSelectListener;
+    }
+
+    public void setFocusAreaSize(float focusAreaSize) {
+        this.focusAreaSize = focusAreaSize;
+    }
 
     public void setDirPath(String dirPath) {
         this.dirPath = dirPath;
@@ -81,12 +88,20 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
         this.context = context;
     }
 
-    public void setMode(int mode) {
-        this.currentMODE = mode;
-    }
-
-    public void setCameraView(SurfaceView surfaceView) throws Exception {
+    public void setCameraView(SurfaceView surfaceView, int screenWidth, int cameraMode) throws Exception {
         this.surfaceView = surfaceView;
+        this.currentMODE = cameraMode;
+        if (currentMODE == MODE4T3) {
+            ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) this.surfaceView.getLayoutParams();
+            layoutParams.width = screenWidth;
+            layoutParams.height = screenWidth * 4 / 3;
+            this.surfaceView.setLayoutParams(layoutParams);
+        } else if (currentMODE == MODE16T9) {
+            ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) this.surfaceView.getLayoutParams();
+            layoutParams.width = screenWidth;
+            layoutParams.height = screenWidth * 16 / 9;
+            this.surfaceView.setLayoutParams(layoutParams);
+        }
         screenDpi = context.getResources().getDisplayMetrics().densityDpi;
         mHolder = surfaceView.getHolder();
         surfaceView.setOnTouchListener(this);
@@ -103,8 +118,6 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
     public void setTopDistance(int topDistance) {
         this.topDistance = topDistance;
     }
-
-    private FocusView focusView;
 
     public void setFocusView(FocusView focusView) {
         this.focusView = focusView;
@@ -125,14 +138,12 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        camera_position = 0;
         closeCamera();
     }
 
     private void openCamera() {
         try {
             closeCamera();
-            flash_type = 0;
             mCamera = Camera.open(camera_position);
             mCamera.setDisplayOrientation(90);
             mCamera.setPreviewDisplay(mHolder);
@@ -154,6 +165,10 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
     }
 
     private void resetCamera() {
+        if (onCameraSelectListener != null) {
+            onCameraSelectListener.onChangeCameraPosition(camera_position);
+        }
+        Log.i(TAG, "camera-camera-position:" + camera_position);
         closeCamera();
         openCamera();
     }
@@ -218,7 +233,10 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
         if (FlashModes == null) {
             return 0;
         }
-        Log.i(TAG, flash_type + "");
+        if (onCameraSelectListener != null) {
+            onCameraSelectListener.onChangeFlashMode(flash_type);
+        }
+        Log.i(TAG, "camera-flash-type:" + flash_type);
         switch (flash_type % 3) {
             case FLASH_ON:
                 if (FlashModes.contains(Camera.Parameters.FLASH_MODE_ON)) {
@@ -273,11 +291,10 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
         return camera_position;
     }
 
-    public final void takePicture(int takePhotoOrientation, Handler handler, boolean isSqurae) {
+    public final void takePicture(int takePhotoOrientation, boolean isSquare) {
         if (mCamera != null) {
             this.takePhotoOrientation = takePhotoOrientation;
-            this.handler = handler;
-            this.isSqurae = isSqurae;
+            this.isSquare = isSquare;
             mCamera.takePicture(null, null, this);
         }
     }
@@ -294,8 +311,6 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    Message message = new Message();
-                    message.what = SUCCESS;
                     Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
                     FileOutputStream fos;
                     Matrix matrix = new Matrix();
@@ -303,7 +318,7 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
                     if (camera_position == Camera.CameraInfo.CAMERA_FACING_FRONT) {
                         matrix.postScale(1, -1);
                     }
-                    if (isSqurae) {
+                    if (isSquare) {
                         bitmap = Bitmap.createBitmap(bitmap, 0, 0,
                                 bitmap.getHeight(), bitmap.getHeight(), matrix,
                                 true);
@@ -316,15 +331,19 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
                     try {
                         fos = new FileOutputStream(PATH_FILE);
                         BufferedOutputStream bos = new BufferedOutputStream(fos);
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 50, bos);
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 60, bos);
                         bos.flush();
-                        handler.sendMessage(message);
                         bos.close();
                         bitmap.recycle();
+                        if (onCameraSelectListener != null) {
+                            onCameraSelectListener.onTakePicture(true, PATH_FILE);
+                        }
                     } catch (Exception e) {
                         bitmap.recycle();
                         e.printStackTrace();
-                        handler.sendEmptyMessage(FAILED);
+                        if (onCameraSelectListener != null) {
+                            onCameraSelectListener.onTakePicture(false, null);
+                        }
                     }
                     System.gc();
                 }
@@ -332,18 +351,6 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
             closeCamera();
         } catch (Exception e) {
             e.printStackTrace();
-        }
-    }
-
-    public static class CameraSizeComparator implements Comparator<Camera.Size> {
-        public int compare(Camera.Size lhs, Camera.Size rhs) {
-            if (lhs.width == rhs.width) {
-                return 0;
-            } else if (lhs.width < rhs.width) {
-                return 1;
-            } else {
-                return -1;
-            }
         }
     }
 
@@ -358,7 +365,6 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
      * Convert touch position x:y in (-1000~1000)
      */
     private Rect calculateTapArea(float x, float y, float coefficient) {
-        float focusAreaSize = 50;
         int areaSize = Float.valueOf(focusAreaSize * coefficient).intValue();
         x = x / surfaceView.getWidth();
         y = y / surfaceView.getHeight();
@@ -442,7 +448,6 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
 
             Rect focusRect = calculateTapArea(event.getRawX(), event.getRawY() - topDistance, 1f);
             Rect meteringRect = calculateTapArea(event.getRawX(), event.getRawY() - topDistance, 2f);
-
 
             Camera.Parameters parameters = mCamera.getParameters();
             if (parameters.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_AUTO))
@@ -551,5 +556,25 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
             throw new FileNotFoundException("file not found!");
         }
         return file;
+    }
+
+    public interface OnCameraSelectListener {
+        public void onTakePicture(boolean success, String filePath);
+
+        public void onChangeFlashMode(int mode);
+
+        public void onChangeCameraPosition(int camera_position);
+    }
+
+    public static class CameraSizeComparator implements Comparator<Camera.Size> {
+        public int compare(Camera.Size lhs, Camera.Size rhs) {
+            if (lhs.width == rhs.width) {
+                return 0;
+            } else if (lhs.width < rhs.width) {
+                return 1;
+            } else {
+                return -1;
+            }
+        }
     }
 }

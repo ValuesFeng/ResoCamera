@@ -22,15 +22,9 @@ public class CameraActivity extends Activity {
         setContentView(R.layout.activity_camera);
         try {
             cameraView = new CameraView(this);
-            cameraView.setMode(CameraView.MODE4T3);
             surfaceView = (SurfaceView) findViewById(R.id.sf_camera);
-            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) surfaceView.getLayoutParams();
-            layoutParams.width = getScreenWidth(this);
-            layoutParams.height = getScreenWidth(this) * 4 / 3;
-            surfaceView.setLayoutParams(layoutParams);
-
             cameraView.setFocusView((FocusView) findViewById(R.id.sf_focus));
-            cameraView.setCameraView(surfaceView);
+            cameraView.setCameraView(surfaceView, getScreenWidth(this), CameraView.MODE4T3);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -49,11 +43,6 @@ public class CameraActivity extends Activity {
         super.onPause();
         if (cameraView != null)
             cameraView.onPause();
-    }
-
-    public static int getScreenHeight(Activity context) {
-        context.getWindowManager().getDefaultDisplay().getMetrics(metric);
-        return metric.heightPixels;
     }
 
     public static int getScreenWidth(Activity context) {
