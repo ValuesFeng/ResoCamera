@@ -3,23 +3,23 @@ ResoCamera
 
 Function：
 ==========    
-   *you can set preview size 16:9 or 4:3  
-   *Flash Control  
-   *Touch Focus  
-   *Front and rear camera toggle  
-   *Two-finger zoom control camera preview  
-   *After taking a picture of the filter(Based on GPUImage)  
+   * you can set preview size 16:9 or 4:3  
+   * Flash Control  
+   * Touch Focus  
+   * Front and rear camera toggle  
+   * Two-finger zoom control camera preview  
+   * After taking a picture of the filter(Based on GPUImage)  
 
 
 ## Simple
-* Flash Mode : FLASH_AUTO (`default`),FLASH_OPEN,FLASH_CLOSE;    
-* Camera Preview Proportion : MODE4T3(`default`),MODE16T9;    
+  * Flash Mode : FLASH_AUTO (`default`),FLASH_OPEN,FLASH_CLOSE;    
+  * Camera Preview Proportion : MODE4T3(`default`),MODE16T9;    
 
-#### you can use:    
- mCamera.changeFlash();    
- mCamera.changeCamera();    
- mCamera.takePicture();    
- mCamera.changeFlash();     
+  #### you can use:    
+    mCamera.changeFlash();    
+    mCamera.changeCamera();    
+    mCamera.takePicture();    
+    mCamera.changeFlash();     
 
 ````java
          public interface OnCameraSelectListener {
