@@ -1,6 +1,8 @@
 ResoCamera
 ==========
 
+![Screenshot](https://github.com/ValuesFeng/ResoCamera/blob/master/images/screenshot_camera.jpg)
+
 Function：
 ==========    
    * you can set preview size 16:9 or 4:3  
