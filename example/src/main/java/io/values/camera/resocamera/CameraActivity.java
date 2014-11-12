@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.ImageButton;
@@ -25,7 +26,7 @@ import io.values.camera.widget.ShakeListener;
 
 
 public class CameraActivity extends Activity implements CameraView.OnCameraSelectListener,
-        View.OnClickListener, ShakeListener.OnShakeListener {
+        View.OnClickListener {
 
     private CameraView cameraView;
     public static DisplayMetrics metric = new DisplayMetrics();
@@ -45,8 +46,6 @@ public class CameraActivity extends Activity implements CameraView.OnCameraSelec
 
     private ImageView imgGrid;
 
-    private int currentOrientation;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,7 +60,6 @@ public class CameraActivity extends Activity implements CameraView.OnCameraSelec
         } catch (Exception e) {
             e.printStackTrace();
         }
-        ShakeListener.newInstance().setOnShakeListener(this);
         initViews();
         showDCIM();
     }
@@ -110,7 +108,7 @@ public class CameraActivity extends Activity implements CameraView.OnCameraSelec
                     //the cursor is not from DCIM
                 }
             } catch (Exception e) {
-
+                e.printStackTrace();
             } finally {
                 cursor.close();
             }
@@ -162,17 +160,7 @@ public class CameraActivity extends Activity implements CameraView.OnCameraSelec
                 imgGrid.setVisibility(View.VISIBLE);
                 break;
             case R.id.ib_camera_take_picture:
-                switch (currentOrientation) {
-                    case ShakeListener.LandscapeLeft:
-                        cameraView.takePicture(CameraView.LandscapeLeft, false);
-                        break;
-                    case ShakeListener.LandscapeRight:
-                        cameraView.takePicture(CameraView.LandscapeRight, false);
-                        break;
-                    case ShakeListener.Portrait:
-                        cameraView.takePicture(CameraView.Portrait, false);
-                        break;
-                }
+                cameraView.takePicture(false);
                 break;
         }
     }
@@ -184,15 +172,13 @@ public class CameraActivity extends Activity implements CameraView.OnCameraSelec
 
     @Override
     public void onShake(int orientation) {
-        if (orientation == currentOrientation) {
-            return;
-        }
-        this.currentOrientation = orientation;
+        // you can rotate views here
+        Log.i("rotate","rotate");
     }
 
     @Override
     public void onTakePicture(boolean success, String filePath) {
-
+        //sd/ResoCamera/(file)
     }
 
     @Override

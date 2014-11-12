@@ -11,9 +11,9 @@ import android.hardware.SensorManager;
  */
 public class ShakeListener implements SensorEventListener {
 
-    public static final int LandscapeLeft = 1;
-    public static final int LandscapeRight = 1 << 1;
-    public static final int Portrait = 1 << 2;
+    public static final int LandscapeLeft = 0;
+    public static final int LandscapeRight = 180;
+    public static final int Portrait = 90;
     private SensorManager sensorManager;
     private static ShakeListener sensor1;
     private Sensor sensor;

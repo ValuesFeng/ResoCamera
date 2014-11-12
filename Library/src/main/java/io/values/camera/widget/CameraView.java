@@ -30,7 +30,7 @@ import java.util.List;
  * Created by valuesfeng on 14-8-8.
  */
 public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallback,
-        Camera.AutoFocusCallback, View.OnTouchListener {
+        Camera.AutoFocusCallback, View.OnTouchListener, ShakeListener.OnShakeListener {
 
     public final static String TAG = CameraView.class.getSimpleName();
 
@@ -40,10 +40,6 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
 
     public static final int MODE4T3 = 43;
     public static final int MODE16T9 = 169;
-
-    public static final int LandscapeLeft = 0;
-    public static final int LandscapeRight = 180;
-    public static final int Portrait = 90;
 
     private int currentMODE = MODE4T3;
 
@@ -108,6 +104,7 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
             layoutParams.height = screenWidth * 16 / 9;
             this.surfaceView.setLayoutParams(layoutParams);
         }
+        ShakeListener.newInstance().setOnShakeListener(this);
         screenDpi = context.getResources().getDisplayMetrics().densityDpi;
         mHolder = surfaceView.getHolder();
         surfaceView.setOnTouchListener(this);
@@ -305,9 +302,8 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
         return camera_position;
     }
 
-    public final void takePicture(int takePhotoOrientation, boolean isSquare) {
+    public final void takePicture(boolean isSquare) {
         if (mCamera != null) {
-            this.takePhotoOrientation = takePhotoOrientation;
             this.isSquare = isSquare;
             mCamera.takePicture(null, null, this);
         }
@@ -345,7 +341,7 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
                     try {
                         fos = new FileOutputStream(PATH_FILE);
                         BufferedOutputStream bos = new BufferedOutputStream(fos);
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 60, bos);
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, bos);
                         bos.flush();
                         bos.close();
                         bitmap.recycle();
@@ -572,12 +568,22 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
         return file;
     }
 
+    @Override
+    public void onShake(int orientation) {
+        if (onCameraSelectListener != null) {
+            onCameraSelectListener.onShake(orientation);
+        }
+        this.takePhotoOrientation = orientation;
+    }
+
     public interface OnCameraSelectListener {
         public void onTakePicture(boolean success, String filePath);
 
         public void onChangeFlashMode(int flashMode);
 
         public void onChangeCameraPosition(int camera_position);
+
+        public void onShake(int orientation);
     }
 
     public static class CameraSizeComparator implements Comparator<Camera.Size> {
