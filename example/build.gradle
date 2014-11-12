@@ -22,5 +22,6 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:support-v4:20.0.0'
-    compile project(':Library')
+    compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.2'
+    compile project(':library')
 }

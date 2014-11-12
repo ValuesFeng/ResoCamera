@@ -1,33 +1,130 @@
 package io.values.camera.resocamera;
 
 import android.app.Activity;
+import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.view.SurfaceView;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
+
+import com.nostra13.universalimageloader.cache.memory.impl.LRULimitedMemoryCache;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
+import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 
 import io.values.camera.widget.CameraView;
 import io.values.camera.widget.FocusView;
+import io.values.camera.widget.ShakeListener;
 
 
-public class CameraActivity extends Activity {
+public class CameraActivity extends Activity implements CameraView.OnCameraSelectListener,
+        View.OnClickListener, ShakeListener.OnShakeListener {
 
     private CameraView cameraView;
-    private SurfaceView surfaceView;
     public static DisplayMetrics metric = new DisplayMetrics();
+
+    DisplayImageOptions options = new DisplayImageOptions.Builder().bitmapConfig(Bitmap.Config.RGB_565)
+            .imageScaleType(ImageScaleType.EXACTLY).considerExifParams(true)
+            .cacheInMemory(false).cacheOnDisk(false).displayer(new FadeInBitmapDisplayer(0)).build();
+
+    private RelativeLayout rlTop;
+
+    private ImageButton ib_camera_change;
+    private ImageButton ib_camera_flash;
+    private ImageButton ib_camera_grid;
+
+    private ImageButton ibTakePicture;
+    private ImageView ibCameraPhotos;
+
+    private ImageView imgGrid;
+
+    private int currentOrientation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        initImaLoader();
         setContentView(R.layout.activity_camera);
         try {
             cameraView = new CameraView(this);
-            surfaceView = (SurfaceView) findViewById(R.id.sf_camera);
+            cameraView.setOnCameraSelectListener(this);
             cameraView.setFocusView((FocusView) findViewById(R.id.sf_focus));
-            cameraView.setCameraView(surfaceView, getScreenWidth(this), CameraView.MODE4T3);
+            cameraView.setCameraView((SurfaceView) findViewById(R.id.sf_camera),
+                    getScreenWidth(), CameraView.MODE4T3);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        ShakeListener.newInstance().setOnShakeListener(this);
+        initViews();
+        showDCIM();
+    }
+
+    private void initViews() {
+        rlTop = (RelativeLayout) findViewById(R.id.rl_top);
+        ib_camera_change = (ImageButton) findViewById(R.id.ib_camera_change);
+        ib_camera_flash = (ImageButton) findViewById(R.id.ib_camera_flash);
+        ib_camera_grid = (ImageButton) findViewById(R.id.ib_camera_grid);
+        ibTakePicture = (ImageButton) findViewById(R.id.ib_camera_take_picture);
+        ibCameraPhotos = (ImageView) findViewById(R.id.ib_camera_photos);
+        imgGrid = (ImageView) findViewById(R.id.img_grid);
+    }
+
+    private void initImaLoader() {
+        ImageLoaderConfiguration config =
+                new ImageLoaderConfiguration
+                        .Builder(getApplicationContext())
+                        .diskCacheFileCount(50)
+                        .threadPoolSize(Thread.NORM_PRIORITY - 2)
+                        .denyCacheImageMultipleSizesInMemory()
+                        .memoryCacheSize(30)
+                        .memoryCache(new LRULimitedMemoryCache(30))
+                        .build();
+        ImageLoader.getInstance().init(config);
+    }
+
+    /**
+     * get first picture DCIM
+     */
+    private void showDCIM() {
+        String columns[] = new String[]{
+                MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID, MediaStore.Images.Media.TITLE, MediaStore.Images.Media.DISPLAY_NAME
+        };
+        Cursor cursor = this.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, null);
+        boolean isOK = false;
+        if (cursor != null) {
+            cursor.moveToLast();
+            String path = "";
+            try {
+                while (!isOK) {
+                    int photoIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                    path = cursor.getString(photoIndex);
+                    isOK = !(path.indexOf("DCIM/Camera") == -1); //Is thie photo from DCIM folder ?
+                    cursor.moveToPrevious(); //Add this so we don't get an infinite loop if the first image from
+                    //the cursor is not from DCIM
+                }
+            } catch (Exception e) {
+
+            } finally {
+                cursor.close();
+            }
+            ImageLoader.getInstance().displayImage("file://" + path, ibCameraPhotos, options);
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        ib_camera_change.setOnClickListener(this);
+        ib_camera_flash.setOnClickListener(this);
+        ib_camera_grid.setOnClickListener(this);
+        ibTakePicture.setOnClickListener(this);
     }
 
     @Override
@@ -35,6 +132,7 @@ public class CameraActivity extends Activity {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) {
             cameraView.onResume();
+            cameraView.setTopDistance(rlTop.getHeight());
         }
     }
 
@@ -45,9 +143,75 @@ public class CameraActivity extends Activity {
             cameraView.onPause();
     }
 
-    public static int getScreenWidth(Activity context) {
-        context.getWindowManager().getDefaultDisplay().getMetrics(metric);
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.ib_camera_change:
+                cameraView.changeCamera();
+                break;
+            case R.id.ib_camera_flash:
+                cameraView.changeFlash();
+                break;
+            case R.id.ib_camera_grid:
+                if (imgGrid.getVisibility() == View.VISIBLE) {
+                    imgGrid.setVisibility(View.GONE);
+                    ib_camera_grid.setBackgroundResource(R.drawable.camera_grid_normal);
+                    break;
+                }
+                ib_camera_grid.setBackgroundResource(R.drawable.camera_grid_press);
+                imgGrid.setVisibility(View.VISIBLE);
+                break;
+            case R.id.ib_camera_take_picture:
+                switch (currentOrientation) {
+                    case ShakeListener.LandscapeLeft:
+                        cameraView.takePicture(CameraView.LandscapeLeft, false);
+                        break;
+                    case ShakeListener.LandscapeRight:
+                        cameraView.takePicture(CameraView.LandscapeRight, false);
+                        break;
+                    case ShakeListener.Portrait:
+                        cameraView.takePicture(CameraView.Portrait, false);
+                        break;
+                }
+                break;
+        }
+    }
+
+    private int getScreenWidth() {
+        getWindowManager().getDefaultDisplay().getMetrics(metric);
         return metric.widthPixels;
     }
 
+    @Override
+    public void onShake(int orientation) {
+        if (orientation == currentOrientation) {
+            return;
+        }
+        this.currentOrientation = orientation;
+    }
+
+    @Override
+    public void onTakePicture(boolean success, String filePath) {
+
+    }
+
+    @Override
+    public void onChangeFlashMode(int flashMode) {
+        switch (flashMode) {
+            case CameraView.FLASH_AUTO:
+                ib_camera_flash.setBackgroundResource(R.drawable.camera_flash_auto);
+                break;
+            case CameraView.FLASH_OFF:
+                ib_camera_flash.setBackgroundResource(R.drawable.camera_flash_off);
+                break;
+            case CameraView.FLASH_ON:
+                ib_camera_flash.setBackgroundResource(R.drawable.camera_flash_on);
+                break;
+        }
+    }
+
+    @Override
+    public void onChangeCameraPosition(int camera_position) {
+
+    }
 }

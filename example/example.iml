@@ -82,7 +82,8 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="support-annotations-20.0.0" level="project" />
     <orderEntry type="library" exported="" name="support-v4-20.0.0" level="project" />
-    <orderEntry type="module" module-name="Library" exported="" />
+    <orderEntry type="library" exported="" name="universal-image-loader-1.9.2" level="project" />
+    <orderEntry type="module" module-name="library" exported="" />
   </component>
 </module>
 
