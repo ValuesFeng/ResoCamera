@@ -1,16 +1,11 @@
 ResoCamera
 ==========
 
-暂时还没有完成,目前只提交了一个原型的CameraView上去，    
-集成很简单，只需要你传一个SurfaceView就可以了。    
-
-功能主要有：  
-   相机 16:9预览和4:3预览 设置  
-   闪光灯控制  
-   人脸识别  
-   触摸对焦  
-   前后置摄像头切换  
-   双指控制相机预览缩放  
-     
-   拍照后的图片滤镜(基于GPUImage)  
-   添加自定义水印效果  
+Function：
+==========
+   you can set preview size 16:9 or 4:3
+   Flash Control
+   Touch Focus
+   Front and rear camera toggle
+   Two-finger zoom control camera preview
+   After taking a picture of the filter(Based on GPUImage)
