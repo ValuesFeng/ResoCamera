@@ -14,7 +14,8 @@ Function：
 ## Simple
 * Flash Mode : FLASH_AUTO (`default`),FLASH_OPEN,FLASH_CLOSE;    
 * Camera Preview Proportion : MODE4T3(`default`),MODE16T9;    
- ####you can use:    
+
+#### you can use:    
  mCamera.changeFlash();    
  mCamera.changeCamera();    
  mCamera.takePicture();    
