@@ -198,9 +198,11 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
         Collections.sort(sizes, sizeComparator);
         for (Camera.Size size : sizes) {
             params.setPictureSize(size.width, size.height);
-            if (size.width * 1.0 / size.height * 1.0 == 4.0 / 3.0 && currentMODE == MODE4T3 && size.height < 2500) {
+            if (size.width * 1.0 / size.height * 1.0 == 4.0 / 3.0
+                    && currentMODE == MODE4T3 && size.height < 2500) {
                 break;
-            } else if (size.width * 1.0 / size.height * 1.0 == 16.0 / 9.0 && currentMODE == MODE16T9 && size.height < 2500) {
+            } else if (size.width * 1.0 / size.height * 1.0 == 16.0 / 9.0
+                    && currentMODE == MODE16T9 && size.height < 2500) {
                 break;
             }
         }
@@ -341,13 +343,14 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
                     try {
                         fos = new FileOutputStream(PATH_FILE);
                         BufferedOutputStream bos = new BufferedOutputStream(fos);
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, bos);
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, bos);
                         bos.flush();
                         bos.close();
                         bitmap.recycle();
                         if (onCameraSelectListener != null) {
                             onCameraSelectListener.onTakePicture(true, PATH_FILE);
                         }
+                        openCamera();
                     } catch (Exception e) {
                         bitmap.recycle();
                         e.printStackTrace();
