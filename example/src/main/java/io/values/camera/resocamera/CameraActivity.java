@@ -178,7 +178,7 @@ public class CameraActivity extends Activity implements CameraView.OnCameraSelec
     @Override
     public void onTakePicture(boolean success, String filePath) {
         //sd/ResoCamera/(file)
-        Log.i("111","1111111");
+        Log.i("111", "1111111");
     }
 
     @Override
