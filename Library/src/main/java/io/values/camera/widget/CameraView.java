@@ -241,6 +241,9 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
      * change camera flash mode
      */
     public final int changeFlash() {
+        if (mCamera==null){
+            return -1;
+        }
         Camera.Parameters parameters = mCamera.getParameters();
         List<String> FlashModes = parameters.getSupportedFlashModes();
         if (FlashModes == null) {
