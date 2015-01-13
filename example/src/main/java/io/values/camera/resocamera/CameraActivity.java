@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.nostra13.universalimageloader.cache.memory.impl.LRULimitedMemoryCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -22,16 +23,14 @@ import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 
 import io.values.camera.widget.CameraView;
 import io.values.camera.widget.FocusView;
-import io.values.camera.widget.ShakeListener;
 
 
 public class CameraActivity extends Activity implements CameraView.OnCameraSelectListener,
         View.OnClickListener {
 
     private CameraView cameraView;
-    public static DisplayMetrics metric = new DisplayMetrics();
 
-    DisplayImageOptions options = new DisplayImageOptions.Builder().bitmapConfig(Bitmap.Config.RGB_565)
+    DisplayImageOptions options = new DisplayImageOptions.Builder().bitmapConfig(Bitmap.Config.ARGB_8888)
             .imageScaleType(ImageScaleType.EXACTLY).considerExifParams(true)
             .cacheInMemory(false).cacheOnDisk(false).displayer(new FadeInBitmapDisplayer(0)).build();
 
@@ -55,8 +54,9 @@ public class CameraActivity extends Activity implements CameraView.OnCameraSelec
             cameraView = new CameraView(this);
             cameraView.setOnCameraSelectListener(this);
             cameraView.setFocusView((FocusView) findViewById(R.id.sf_focus));
-            cameraView.setCameraView((SurfaceView) findViewById(R.id.sf_camera),
-                    getScreenWidth(), CameraView.MODE4T3);
+            //  cameraView.setCameraView((SurfaceView) findViewById(R.id.sf_camera));  //default
+            cameraView.setCameraView((SurfaceView) findViewById(R.id.sf_camera), CameraView.MODE4T3);
+            cameraView.setPicQuality(50);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -65,13 +65,17 @@ public class CameraActivity extends Activity implements CameraView.OnCameraSelec
     }
 
     private void initViews() {
-        rlTop = (RelativeLayout) findViewById(R.id.rl_top);
-        ib_camera_change = (ImageButton) findViewById(R.id.ib_camera_change);
-        ib_camera_flash = (ImageButton) findViewById(R.id.ib_camera_flash);
-        ib_camera_grid = (ImageButton) findViewById(R.id.ib_camera_grid);
-        ibTakePicture = (ImageButton) findViewById(R.id.ib_camera_take_picture);
-        ibCameraPhotos = (ImageView) findViewById(R.id.ib_camera_photos);
-        imgGrid = (ImageView) findViewById(R.id.img_grid);
+        rlTop = $(R.id.rl_top);
+        ib_camera_change = $(R.id.ib_camera_change);
+        ib_camera_flash = $(R.id.ib_camera_flash);
+        ib_camera_grid = $(R.id.ib_camera_grid);
+        ibTakePicture = $(R.id.ib_camera_take_picture);
+        ibCameraPhotos = $(R.id.ib_camera_photos);
+        imgGrid = $(R.id.img_grid);
+    }
+
+    private <T extends View> T $(int resId) {
+        return (T) super.findViewById(resId);
     }
 
     private void initImaLoader() {
@@ -165,11 +169,6 @@ public class CameraActivity extends Activity implements CameraView.OnCameraSelec
         }
     }
 
-    private int getScreenWidth() {
-        getWindowManager().getDefaultDisplay().getMetrics(metric);
-        return metric.widthPixels;
-    }
-
     @Override
     public void onShake(int orientation) {
         // you can rotate views here
@@ -178,7 +177,9 @@ public class CameraActivity extends Activity implements CameraView.OnCameraSelec
     @Override
     public void onTakePicture(boolean success, String filePath) {
         //sd/ResoCamera/(file)
-        Log.i("111", "1111111");
+        if (success){
+            Toast.makeText(this,"seccess!",Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

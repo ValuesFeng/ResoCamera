@@ -10,7 +10,7 @@
             android:id="@+id/rl_top"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:background="#4e5051">
+            android:background="#343434">
 
             <ImageButton
                 android:id="@+id/ib_camera_change"
@@ -72,7 +72,7 @@
             android:layout_width="match_parent"
             android:layout_height="92dp"
             android:layout_alignParentBottom="true"
-            android:background="#4e5051">
+            android:background="#343434">
 
             <ImageButton
                 android:id="@+id/ib_camera_take_picture"

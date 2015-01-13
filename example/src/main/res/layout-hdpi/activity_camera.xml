@@ -10,7 +10,7 @@
             android:id="@+id/rl_top"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:background="#4e5051">
+            android:background="#343434">
 
             <ImageButton
                 android:id="@+id/ib_camera_change"
@@ -70,14 +70,14 @@
         <RelativeLayout
             android:id="@+id/rl_bottom"
             android:layout_width="match_parent"
-            android:layout_height="72dp"
+            android:layout_height="62dp"
             android:layout_alignParentBottom="true"
-            android:background="#4e5051">
+            android:background="#343434">
 
             <ImageButton
                 android:id="@+id/ib_camera_take_picture"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
                 android:layout_centerInParent="true"
                 android:background="@drawable/camera_take_picture" />
 
