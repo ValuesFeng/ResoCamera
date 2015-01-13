@@ -4,7 +4,6 @@ android {
     buildToolsVersion "20.0.0"
 
     defaultConfig {
-        applicationId "io.values.camera.widget"
         minSdkVersion 14
         targetSdkVersion 14
         versionCode 1
@@ -12,7 +11,7 @@ android {
     }
     buildTypes {
         release {
-            runProguard false
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
