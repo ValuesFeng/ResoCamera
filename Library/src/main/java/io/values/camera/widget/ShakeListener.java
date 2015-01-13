@@ -45,7 +45,8 @@ public class ShakeListener implements SensorEventListener {
     }
 
     public void stop() {
-        sensorManager.unregisterListener(this);
+        if (sensorManager != null)
+            sensorManager.unregisterListener(this);
     }
 
     public interface OnShakeListener {
