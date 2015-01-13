@@ -7,6 +7,7 @@ import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.hardware.Camera;
+import android.media.ExifInterface;
 import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.util.FloatMath;
@@ -16,6 +17,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -34,10 +36,16 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
 
     public final static String TAG = CameraView.class.getSimpleName();
 
+    /**
+     * camera flash mode
+     */
     public final static int FLASH_AUTO = 2;
     public final static int FLASH_OFF = 0;
     public final static int FLASH_ON = 1;
 
+    /**
+     * camera prewView size
+     */
     public static final int MODE4T3 = 43;
     public static final int MODE16T9 = 169;
 
@@ -52,6 +60,10 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
     private static int camera_position = Camera.CameraInfo.CAMERA_FACING_BACK;// 0 back camera , 1 front camera
     private int takePhotoOrientation = 90;
 
+    /**
+     * if you need square picture , you can set true while you take a picture;
+     * see {@link #takePicture(boolean)}
+     */
     private boolean isSquare;
 
     private int topDistance;
@@ -63,8 +75,17 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
 
     private String dirPath;
     private int screenDpi;
-    private float focusAreaSize = 100;
+    /**
+     * touch focus area size
+     */
+    private float focusAreaSize = 300;
     private OnCameraSelectListener onCameraSelectListener;
+
+    private int picQuality = 80;
+
+    public void setPicQuality(int picQuality) {
+        this.picQuality = picQuality;
+    }
 
     public void setOnCameraSelectListener(OnCameraSelectListener onCameraSelectListener) {
         this.onCameraSelectListener = onCameraSelectListener;
@@ -84,15 +105,19 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
         this.context = context;
     }
 
+    public void setCameraView(SurfaceView surfaceView) throws NullPointerException, ClassCastException {
+        this.setCameraView(surfaceView, MODE4T3);
+    }
+
     /**
      * @param surfaceView the camera view you should give it
-     * @param screenWidth width of the screen
      * @param cameraMode  set the camera preview proportion ,default is MODE4T3; {@link #MODE4T3}
      * @throws Exception
      */
-    public void setCameraView(SurfaceView surfaceView, int screenWidth, int cameraMode) throws Exception {
+    public void setCameraView(SurfaceView surfaceView, int cameraMode) throws NullPointerException, ClassCastException {
         this.surfaceView = surfaceView;
         this.currentMODE = cameraMode;
+        int screenWidth = context.getResources().getDisplayMetrics().widthPixels;
         if (currentMODE == MODE4T3) {
             ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) this.surfaceView.getLayoutParams();
             layoutParams.width = screenWidth;
@@ -199,14 +224,14 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
         for (Camera.Size size : sizes) {
             params.setPictureSize(size.width, size.height);
             if (size.width * 1.0 / size.height * 1.0 == 4.0 / 3.0
-                    && currentMODE == MODE4T3 && size.height < 2500) {
+                    && currentMODE == MODE4T3 && size.height < 2000) {
                 break;
             } else if (size.width * 1.0 / size.height * 1.0 == 16.0 / 9.0
-                    && currentMODE == MODE16T9 && size.height < 2500) {
+                    && currentMODE == MODE16T9 && size.height < 2000) {
                 break;
             }
         }
-        params.setJpegQuality(100);
+        params.setJpegQuality(picQuality);
         params.setPictureFormat(ImageFormat.JPEG);
         mCamera.setParameters(params);
     }
@@ -241,7 +266,7 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
      * change camera flash mode
      */
     public final int changeFlash() {
-        if (mCamera==null){
+        if (mCamera == null) {
             return -1;
         }
         Camera.Parameters parameters = mCamera.getParameters();
@@ -307,9 +332,22 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
         return camera_position;
     }
 
+//    private int currentOrientation;
+
     public final void takePicture(boolean isSquare) {
         if (mCamera != null) {
             this.isSquare = isSquare;
+//            switch (this.takePhotoOrientation) {
+//                case ShakeListener.Portrait:
+//                    takePhotoOrientation = 90;
+//                    break;
+//                case ShakeListener.LandscapeLeft:
+//                    takePhotoOrientation = 0;
+//                    break;
+//                case ShakeListener.LandscapeRight:
+//                    takePhotoOrientation = 180;
+//                    break;
+//            }
             mCamera.takePicture(null, null, this);
         }
     }
@@ -326,42 +364,59 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-                    FileOutputStream fos;
-                    Matrix matrix = new Matrix();
-                    matrix.postRotate(takePhotoOrientation);
-                    if (camera_position == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-                        matrix.postScale(1, -1);
-                    }
-                    if (isSquare) {
-                        bitmap = Bitmap.createBitmap(bitmap, 0, 0,
-                                bitmap.getHeight(), bitmap.getHeight(), matrix,
-                                true);
-                    } else {
-                        bitmap = Bitmap.createBitmap(bitmap, 0, 0,
-                                bitmap.getWidth(), bitmap.getHeight(), matrix,
-                                true);
-                    }
-                    System.gc();
+                    Bitmap bitmap = null;
                     try {
+                        bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+                        FileOutputStream fos;
+                        ExifInterface exifInterface = new ExifInterface(PATH_FILE);
+                        switch (takePhotoOrientation) {
+                            case 0:
+                                exifInterface.setAttribute(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL + "");
+                                break;
+                            case 90:
+                                exifInterface.setAttribute(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_ROTATE_90 + "");
+                                break;
+                            case 180:
+                                exifInterface.setAttribute(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_ROTATE_180 + "");
+                                break;
+                            case 270:
+                                exifInterface.setAttribute(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_ROTATE_270 + "");
+                                break;
+                        }
+                        if (camera_position == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                            Matrix matrix = new Matrix();
+                            matrix.postScale(-1, 1);
+                            bitmap = Bitmap.createBitmap(bitmap, 0, 0,
+                                    bitmap.getWidth(), bitmap.getHeight(), matrix,
+                                    true);
+                        }
+                        if (isSquare) {
+                            bitmap = Bitmap.createBitmap(bitmap, 0, 0,
+                                    bitmap.getHeight(), bitmap.getHeight(), null,
+                                    true);
+                        }
+                        System.gc();
                         fos = new FileOutputStream(PATH_FILE);
                         BufferedOutputStream bos = new BufferedOutputStream(fos);
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, bos);
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
                         bos.flush();
                         bos.close();
+                        exifInterface.saveAttributes();
                         bitmap.recycle();
                         if (onCameraSelectListener != null) {
                             onCameraSelectListener.onTakePicture(true, PATH_FILE);
                         }
                         openCamera();
                     } catch (Exception e) {
-                        bitmap.recycle();
+                        if (bitmap != null)
+                            bitmap.recycle();
                         e.printStackTrace();
                         if (onCameraSelectListener != null) {
-                            onCameraSelectListener.onTakePicture(false, null);
+                            onCameraSelectListener.onTakePicture(false, "相机出错啦!");
                         }
                     }
                     System.gc();
+                    takePhotoOrientation = 0;
                 }
             }).start();
             closeCamera();
