@@ -6,7 +6,6 @@ ResoCamera
 Function：
 ==========    
    * you can set preview size 16:9 or 4:3  
-   * you can set picture quality now (1-100)  
    * Flash Control  
    * Touch Focus  
    * Front and rear camera toggle  
@@ -30,6 +29,12 @@ Function：
             public void onChangeCameraPosition(int camera_position);
         }
 ````
+
+## Update 
+   * Enhance the speed camera
+   * you can set picture quality now (1-100)  
+   * fix bug - take picture orientation
+
     
 ## Quick Setup
 #### 1. Android Manifest
