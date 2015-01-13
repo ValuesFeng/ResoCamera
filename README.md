@@ -3,7 +3,7 @@ ResoCamera
 
 ![Screenshot](https://github.com/ValuesFeng/ResoCamera/blob/master/images/screenshot_camera.jpg)
 #### Download
-[resoCamera](http://1.values.sinaapp.com/download/resoCamera.apk)
+[resoCamera.apk](http://1.values.sinaapp.com/download/resoCamera.apk)
 Function：
 ==========    
    * you can set preview size 16:9 or 4:3  
