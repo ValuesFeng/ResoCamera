@@ -6,6 +6,7 @@ ResoCamera
 Function：
 ==========    
    * you can set preview size 16:9 or 4:3  
+   * you can set picture quality now (1-100)  
    * Flash Control  
    * Touch Focus  
    * Front and rear camera toggle  
@@ -47,7 +48,8 @@ Function：
 ````
     
 
-``` java
+````java
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,26 +60,29 @@ Function：
             /**
              *  setCameraView(SurfaceView surfaceView, int screenWidth, int cameraMode)
              */
-            cameraView.setCameraView((SurfaceView) findViewById(R.id.sf_camera), getScreenWidth(this), CameraView.MODE4T3);
+            // cameraView.setCameraView((SurfaceView) findViewById(R.id.sf_camera));
+            cameraView.setCameraView((SurfaceView) findViewById(R.id.sf_camera),CameraView.MODE4T3);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
+    
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) {
             cameraView.onResume();//must
+        }else{
+         cameraView.onPause();
         }
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (cameraView != null)
-            cameraView.onPause(); //must
-    }
+    //@Override
+    //protected void onPause() {
+    //    super.onPause();
+    //    if (cameraView != null)
+    //        cameraView.onPause(); //must
+    //}
 ````
 
 ## License
