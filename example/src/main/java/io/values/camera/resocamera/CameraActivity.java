@@ -175,11 +175,16 @@ public class CameraActivity extends Activity implements CameraView.OnCameraSelec
     }
 
     @Override
-    public void onTakePicture(boolean success, String filePath) {
+    public void onTakePicture(final boolean success, String filePath) {
         //sd/ResoCamera/(file)
-        if (success){
-            Toast.makeText(this,"seccess!",Toast.LENGTH_SHORT).show();
-        }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (success){
+                    Toast.makeText(CameraActivity.this,"seccess!",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     @Override
