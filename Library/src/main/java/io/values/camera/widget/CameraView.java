@@ -17,7 +17,6 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -84,7 +83,8 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
     private int picQuality = 80;
 
     public void setPicQuality(int picQuality) {
-        this.picQuality = picQuality;
+        if (picQuality > 0 && picQuality < 101)
+            this.picQuality = picQuality;
     }
 
     public void setOnCameraSelectListener(OnCameraSelectListener onCameraSelectListener) {
