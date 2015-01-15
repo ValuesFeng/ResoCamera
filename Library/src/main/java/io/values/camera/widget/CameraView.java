@@ -332,22 +332,9 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
         return camera_position;
     }
 
-//    private int currentOrientation;
-
     public final void takePicture(boolean isSquare) {
         if (mCamera != null) {
             this.isSquare = isSquare;
-//            switch (this.takePhotoOrientation) {
-//                case ShakeListener.Portrait:
-//                    takePhotoOrientation = 90;
-//                    break;
-//                case ShakeListener.LandscapeLeft:
-//                    takePhotoOrientation = 0;
-//                    break;
-//                case ShakeListener.LandscapeRight:
-//                    takePhotoOrientation = 180;
-//                    break;
-//            }
             mCamera.takePicture(null, null, this);
         }
     }
@@ -371,16 +358,16 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
                         ExifInterface exifInterface = new ExifInterface(PATH_FILE);
                         switch (takePhotoOrientation) {
                             case 0:
-                                exifInterface.setAttribute(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL + "");
+                                exifInterface.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(ExifInterface.ORIENTATION_NORMAL));
                                 break;
                             case 90:
-                                exifInterface.setAttribute(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_ROTATE_90 + "");
+                                exifInterface.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(ExifInterface.ORIENTATION_ROTATE_90));
                                 break;
                             case 180:
-                                exifInterface.setAttribute(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_ROTATE_180 + "");
+                                exifInterface.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(ExifInterface.ORIENTATION_ROTATE_180));
                                 break;
                             case 270:
-                                exifInterface.setAttribute(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_ROTATE_270 + "");
+                                exifInterface.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(ExifInterface.ORIENTATION_ROTATE_270));
                                 break;
                         }
                         if (camera_position == Camera.CameraInfo.CAMERA_FACING_FRONT) {
