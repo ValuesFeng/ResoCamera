@@ -270,8 +270,8 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
             return -1;
         }
         Camera.Parameters parameters = mCamera.getParameters();
-        List<String> FlashModes = parameters.getSupportedFlashModes();
-        if (FlashModes == null) {
+        List<String> flashModes = parameters.getSupportedFlashModes();
+        if (flashModes == null || flashModes.size() <= 1) {
             return 0;
         }
         if (onCameraSelectListener != null) {
@@ -280,28 +280,28 @@ public class CameraView implements SurfaceHolder.Callback, Camera.PictureCallbac
         Log.i(TAG, "camera-flash-type:" + flash_type);
         switch (flash_type % 3) {
             case FLASH_ON:
-                if (FlashModes.contains(Camera.Parameters.FLASH_MODE_ON)) {
+                if (flashModes.contains(Camera.Parameters.FLASH_MODE_ON)) {
                     parameters.setFlashMode(Camera.Parameters.FLASH_MODE_ON);
                     flash_type++;
                     mCamera.setParameters(parameters);
                 }
                 break;
             case FLASH_OFF:
-                if (FlashModes.contains(Camera.Parameters.FLASH_MODE_OFF)) {
+                if (flashModes.contains(Camera.Parameters.FLASH_MODE_OFF)) {
                     parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
                     flash_type++;
                     mCamera.setParameters(parameters);
                 }
                 break;
             case FLASH_AUTO:
-                if (FlashModes.contains(Camera.Parameters.FLASH_MODE_AUTO)) {
+                if (flashModes.contains(Camera.Parameters.FLASH_MODE_AUTO)) {
                     parameters.setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
                     flash_type++;
                     mCamera.setParameters(parameters);
                 }
                 break;
             default:
-                if (FlashModes.contains(Camera.Parameters.FLASH_MODE_OFF)) {
+                if (flashModes.contains(Camera.Parameters.FLASH_MODE_OFF)) {
                     parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
                     flash_type++;
                     mCamera.setParameters(parameters);
