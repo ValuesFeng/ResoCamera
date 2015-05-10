@@ -1,3 +1,69 @@
+*.apk
+*.ap_
+*.dex
+*.class
+bin/
+*/build/
+*/build
+gen/
+local.properties
+.classpath
+.project
+proguard/
+*.iws
+*.iml
+*.ipr
+.idea/
+.idea/workspace.xml
+.idea/tasks.xml
+.gradle*
+*~
+*.swp
+*.bin
+*.war
+*~
+*.lock
+*.DS_Store
+*.swp
+*.out
+target/
+*.iml
+*.ipr
+*.iws
+.settings/
+.classpath
+.project
+.metadata/
+.idea/
+
+gradlew
+
+gradlew.bat
+
+.DS_Store
+
+# built application files
+*.apk
+*.ap_
+
+# files for the dex VM
+*.dex
+
+# Java class files
+*.class
+
+# generated files
+bin/
+gen/
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Eclipse project files
+.classpath
+.project
+
+# Android Studio
 .idea/
 .gradle
 gradle
