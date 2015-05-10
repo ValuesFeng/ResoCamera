@@ -41,3 +41,4 @@ dependencies {
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.3'
     compile project(':Library')
 }
+
